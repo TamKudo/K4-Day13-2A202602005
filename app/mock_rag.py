@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from .tracing import observe
 import time
 
 from .incidents import STATE
@@ -10,7 +10,7 @@ CORPUS = {
     "policy": ["Do not expose PII in logs. Use sanitized summaries only."],
 }
 
-
+@observe(as_type="span")
 def retrieve(message: str) -> list[str]:
     if STATE["tool_fail"]:
         raise RuntimeError("Vector store timeout")
