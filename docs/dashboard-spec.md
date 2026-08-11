@@ -1,26 +1,19 @@
-# Yêu cầu dashboard
+# Dashboard specification
 
-Contract có thể kiểm tra bằng máy nằm tại `config/dashboard.yaml`. Hướng dẫn dựng và kiểm tra runtime nằm tại [DASHBOARD_SETUP.md](DASHBOARD_SETUP.md).
+The runtime source is `data/logs.jsonl`, following the six-panel contract in `config/dashboard.yaml`. The dashboard defaults to the last 60 minutes, refreshes every 30 seconds where supported, and displays a threshold/SLO line on every applicable panel.
 
-Dashboard chính cần đủ 6 nhóm thông tin:
+| Panel | Source fields | Visualization and unit | Threshold / SLO line |
+|---|---|---|---|
+| Latency percentiles | `response_sent.latency_ms` | Line chart: P50, P95, P99 in ms | P95 <= 3000 ms |
+| Request traffic | `request_received` events | Requests per minute | At least 1 request/minute during an active test |
+| Error rate and breakdown | `request_failed.error_type`, `request_received` | Percent plus error-type breakdown table | Error rate <= 2% |
+| Cost over time | `response_sent.cost_usd` | USD per minute and total USD | Daily cost <= 2.5 USD |
+| Input and output tokens | `response_sent.tokens_in`, `response_sent.tokens_out` | Token totals | Review when total exceeds 50,000 tokens |
+| Quality proxy | `response_sent.quality_score` | Average score from 0 to 1 | Average >= 0.75 |
 
-1. Latency P50/P95/P99.
-2. Traffic: request count hoặc QPS.
-3. Error rate và breakdown theo loại lỗi.
-4. Cost theo thời gian.
-5. Tổng token input/output.
-6. Quality proxy.
+The dashboard is paired with Langfuse traces for drill-down. When a threshold is breached, open the relevant trace, read its correlation ID, then search `data/logs.jsonl` for the matching request.
 
-Tiêu chuẩn trình bày:
-
-- Khoảng thời gian mặc định: 1 giờ.
-- Tự refresh mỗi 15–30 giây nếu công cụ hỗ trợ.
-- Có threshold hoặc SLO line.
-- Ghi rõ đơn vị.
-- Chỉ giữ 6–8 panel quan trọng ở lớp chính.
-- Screenshot phải nhìn được tên panel và khoảng thời gian.
-
-Kiểm tra contract trước khi chụp evidence:
+Before taking dashboard evidence, run:
 
 ```bash
 python scripts/validate_dashboard.py

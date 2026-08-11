@@ -4,7 +4,7 @@ slis:
   latency_p95_ms:
     objective: 3000
     target: 99.5
-    note: Replace with your group's target
+    note: End-to-end chat P95 target, chosen to protect interactive user experience.
   error_rate_pct:
     objective: 2
     target: 99.0

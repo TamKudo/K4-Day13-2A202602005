@@ -1,45 +1,45 @@
-# Template Alert và Runbook
+# Alert Runbooks
 
-Mỗi alert phải dựa trên triệu chứng người dùng hoặc SLO, không dựa trực tiếp vào tên implementation nội bộ.
+Every alert is symptom-based: it describes an impact visible to users or an SLO breach, rather than an internal function or component name.
 
 ## Alert 1
 
-- Tên:High chat latency P95
-- Severity:warning
-- SLI/SLO liên quan:
-- Điều kiện và thời gian duy trì:P95 latency vượt 3000 ms trong 5 phút
-- Ảnh hưởng tới người dùng:Người dùng chờ phản hồi chat lâu hoặc timeout.
-- Ba bước kiểm tra đầu tiên:
-    1. Kiểm tra P95 trên dashboard hoặc /metrics.
-    2. Mở trace latency cao nhất, xác định span chậm nhất.
-    3. Tìm correlation ID của trace trong data/logs.jsonl.
-- Mitigation tạm thời:Tắt/giảm feature gây tải, rollback prompt production hoặc giảm concurrency.
-- Owner:on-call engineer
+- Name: High chat latency P95
+- Severity: warning
+- Related SLI/SLO: `latency_p95_ms`, objective <= 3000 ms for 99.5% of requests.
+- Condition and duration: P95 latency exceeds 3000 ms for 5 minutes.
+- User impact: users experience slow responses or may abandon a chat request.
+- First three checks:
+  1. Check P50/P95/P99 on the dashboard and identify the affected feature or time window.
+  2. Open the slowest Langfuse trace and identify the longest span (`retrieve`, `generate`, or prompt retrieval).
+  3. Use the trace correlation ID to find matching records in `data/logs.jsonl` and compare request metadata.
+- Temporary mitigation: reduce concurrency, disable an affected feature, or roll back the production prompt/recent release.
+- Owner: on-call-engineer
 
 ## Alert 2
 
-- Tên:Elevated chat error rate
+- Name: Elevated chat error rate
 - Severity: critical
-- SLI/SLO liên quan:error_rate_pct, mục tiêu ≤ 2%
-- Điều kiện và thời gian duy trì:error_rate_pct vượt 5% trong 3 phút
-- Ảnh hưởng tới người dùng: Người dùng không nhận được câu trả lời.
-- Ba bước kiểm tra đầu tiên:
-    1. Kiểm tra error_rate_pct và error_breakdown tại /metrics.
-    2. Mở trace lỗi gần nhất.
-    3. Tìm request_failed theo correlation ID trong log.
-- Mitigation tạm thời: Disable feature/incident lỗi, rollback thay đổi gần nhất.
-- Owner: on-call engineer
+- Related SLI/SLO: `error_rate_pct`, objective <= 2%.
+- Condition and duration: error rate exceeds 5% for 3 minutes.
+- User impact: users do not receive a usable answer.
+- First three checks:
+  1. Check `error_rate_pct` and `error_breakdown` on `/metrics` or the dashboard.
+  2. Open a recent failed trace and identify the failed span or error message.
+  3. Find `request_failed` with the same correlation ID in `data/logs.jsonl`.
+- Temporary mitigation: disable the failing feature or incident scenario and roll back the latest application or prompt change.
+- Owner: on-call-engineer
 
 ## Alert 3
 
-- Tên: Daily AI cost budget exceeded
-- Severity:warning
-- SLI/SLO liên quan:daily_cost_usd, mục tiêu ≤ 2.5 USD
-- Điều kiện và thời gian duy trì:daily cost vượt 2.5 USD
-- Ảnh hưởng tới người dùng:Không trực tiếp làm lỗi user, nhưng có nguy cơ vượt ngân sách.
-- Ba bước kiểm tra đầu tiên:
-    1. Kiểm tra total_cost_usd, avg_cost_usd và token totals.
-    2. Mở trace có cost/token cao, kiểm tra model và prompt version.
-    3. Dùng correlation ID để kiểm tra feature/request liên quan trong logs.
-- Mitigation tạm thời: Rollback prompt/model, giới hạn output token, tắt tính năng gây cost spike.
-- Owner:team lead
+- Name: Daily AI cost budget exceeded
+- Severity: warning
+- Related SLI/SLO: `daily_cost_usd`, objective <= 2.5 USD.
+- Condition and duration: daily cost exceeds 2.5 USD.
+- User impact: no immediate request failure, but continued use risks exhausting the service budget.
+- First three checks:
+  1. Check total cost, average cost, and input/output token totals.
+  2. Open high-cost traces and compare model, feature, and prompt version metadata.
+  3. Use correlation IDs to identify the request pattern responsible for the cost increase.
+- Temporary mitigation: roll back the prompt or model change, reduce output-token limits, and temporarily disable the expensive feature.
+- Owner: team-lead
