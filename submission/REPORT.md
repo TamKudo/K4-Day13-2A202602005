@@ -10,6 +10,8 @@
 ## 2. Kết quả kỹ thuật
 
 - Điểm `validate_logs.py`:
+  - Baseline (trước khi implement CP1, 2026-08-11): 30/100 — Total records: 21, Missing required fields: 20, Missing enrichment: 20, Unique correlation IDs: 0, PII leaks: 0
+  - Sau khi implement CP1 (2026-08-11): 100/100 — Total records: 20, Missing required fields: 0, Missing enrichment: 0, Unique correlation IDs: 10, PII leaks: 0
 - Tổng số traces:
 - Số PII leak còn lại:
 - Link/đường dẫn dashboard:
