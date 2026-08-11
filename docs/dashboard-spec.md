@@ -2,6 +2,8 @@
 
 The runtime source is `data/logs.jsonl`, following the six-panel contract in `config/dashboard.yaml`. The dashboard defaults to the last 60 minutes, refreshes every 30 seconds where supported, and displays a threshold/SLO line on every applicable panel.
 
+The runnable implementation is in `dashboard/`. Start it with `cd dashboard && npm install && npm run dev`, then open `http://localhost:3000`. The current evidence snapshot contains 96 completed requests aggregated from 204 structured log records and includes the investigated `rag_slow` correlation ID.
+
 | Panel | Source fields | Visualization and unit | Threshold / SLO line |
 |---|---|---|---|
 | Latency percentiles | `response_sent.latency_ms` | Line chart: P50, P95, P99 in ms | P95 <= 3000 ms |
@@ -18,3 +20,5 @@ Before taking dashboard evidence, run:
 ```bash
 python scripts/validate_dashboard.py
 ```
+
+Save the full dashboard view as `submission/evidence/dashboard-six-panels.png` so all six panels and their thresholds are visible in one image.
